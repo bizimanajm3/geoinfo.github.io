@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/proj4.js"></script>
+        <script src="js/proj4leaflet.js"></script>
+        <script src="data/hydro_0.js"></script>
+        <script src="data/_1.js"></script>
+        <script src="data/__2.js"></script>
+        <script src="data/BI_20180927_WGS84_buildings_polygons_buildings_3.js"></script>
+        <script src="data/BI_20180927_WGS84_transports_roads_lines_roadsother_4.js"></script>
+        <script src="data/BI_20180927_WGS84_transports_roads_lines_roadsmain_5.js"></script>
+        <script src="data/BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6.js"></script>
+        <script src="data/__7.js"></script>
+        <script src="data/Chef_Lieu_Commune_8.js"></script>
+        <script src="data/Chef_Lieu_Province_9.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var crs = new L.Proj.CRS('EPSG:32735', '+proj=utm +zone=35 +south +datum=WGS84 +units=m +no_defs', {
+            resolutions: [2800, 1400, 700, 350, 175, 84, 42, 21, 11.2, 5.6, 2.8, 1.4, 0.7, 0.35, 0.14, 0.07],
+        });
+        var map = L.map('map', {
+            crs: crs,
+            continuousWorld: false,
+            worldCopyJump: false, 
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-3.398471683111674,29.35523155912282],[-3.383878458006443,29.384571449458598]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            map.setMaxBounds(map.getBounds());
+        }
+        function pop_hydro_0(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['water'] !== null ? Autolinker.link(String(feature.properties['water'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['natural'] !== null ? Autolinker.link(String(feature.properties['natural'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_hydro_0_0() {
+            return {
+                pane: 'pane_hydro_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(133,182,111,1.0)',
+            }
+        }
+        map.createPane('pane_hydro_0');
+        map.getPane('pane_hydro_0').style.zIndex = 400;
+        map.getPane('pane_hydro_0').style['mix-blend-mode'] = 'normal';
+        var layer_hydro_0 = new L.geoJson(json_hydro_0, {
+            attribution: '',
+            pane: 'pane_hydro_0',
+            onEachFeature: pop_hydro_0,
+            style: style_hydro_0_0,
+        });
+        bounds_group.addLayer(layer_hydro_0);
+        map.addLayer(layer_hydro_0);
+        function pop__1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_way_id'] !== null ? Autolinker.link(String(feature.properties['osm_way_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['boundary'] !== null ? Autolinker.link(String(feature.properties['boundary'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['admin_leve'] !== null ? Autolinker.link(String(feature.properties['admin_leve'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ref_COG'] !== null ? Autolinker.link(String(feature.properties['ref_COG'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style__1_0() {
+            return {
+                pane: 'pane__1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,181,51,0.0)',
+            }
+        }
+        map.createPane('pane__1');
+        map.getPane('pane__1').style.zIndex = 401;
+        map.getPane('pane__1').style['mix-blend-mode'] = 'normal';
+        var layer__1 = new L.geoJson(json__1, {
+            attribution: '',
+            pane: 'pane__1',
+            onEachFeature: pop__1,
+            style: style__1_0,
+        });
+        bounds_group.addLayer(layer__1);
+        map.addLayer(layer__1);
+        function pop___2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_way_id'] !== null ? Autolinker.link(String(feature.properties['osm_way_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['boundary'] !== null ? Autolinker.link(String(feature.properties['boundary'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['admin_leve'] !== null ? Autolinker.link(String(feature.properties['admin_leve'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ref_COG'] !== null ? Autolinker.link(String(feature.properties['ref_COG'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style___2_0() {
+            return {
+                pane: 'pane___2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(243,166,178,0.0)',
+            }
+        }
+        map.createPane('pane___2');
+        map.getPane('pane___2').style.zIndex = 402;
+        map.getPane('pane___2').style['mix-blend-mode'] = 'normal';
+        var layer___2 = new L.geoJson(json___2, {
+            attribution: '',
+            pane: 'pane___2',
+            onEachFeature: pop___2,
+            style: style___2_0,
+        });
+        bounds_group.addLayer(layer___2);
+        map.addLayer(layer___2);
+        function pop_BI_20180927_WGS84_buildings_polygons_buildings_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_way_id'] !== null ? Autolinker.link(String(feature.properties['osm_way_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building'] !== null ? Autolinker.link(String(feature.properties['building'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['amenity'] !== null ? Autolinker.link(String(feature.properties['amenity'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['office'] !== null ? Autolinker.link(String(feature.properties['office'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shop'] !== null ? Autolinker.link(String(feature.properties['shop'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_BI_20180927_WGS84_buildings_polygons_buildings_3_0() {
+            return {
+                pane: 'pane_BI_20180927_WGS84_buildings_polygons_buildings_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,125,183,1.0)',
+            }
+        }
+        map.createPane('pane_BI_20180927_WGS84_buildings_polygons_buildings_3');
+        map.getPane('pane_BI_20180927_WGS84_buildings_polygons_buildings_3').style.zIndex = 403;
+        map.getPane('pane_BI_20180927_WGS84_buildings_polygons_buildings_3').style['mix-blend-mode'] = 'normal';
+        var layer_BI_20180927_WGS84_buildings_polygons_buildings_3 = new L.geoJson(json_BI_20180927_WGS84_buildings_polygons_buildings_3, {
+            attribution: '',
+            pane: 'pane_BI_20180927_WGS84_buildings_polygons_buildings_3',
+            onEachFeature: pop_BI_20180927_WGS84_buildings_polygons_buildings_3,
+            style: style_BI_20180927_WGS84_buildings_polygons_buildings_3_0,
+        });
+        bounds_group.addLayer(layer_BI_20180927_WGS84_buildings_polygons_buildings_3);
+        map.addLayer(layer_BI_20180927_WGS84_buildings_polygons_buildings_3);
+        function pop_BI_20180927_WGS84_transports_roads_lines_roadsother_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['highway'] !== null ? Autolinker.link(String(feature.properties['highway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ref'] !== null ? Autolinker.link(String(feature.properties['ref'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['surface'] !== null ? Autolinker.link(String(feature.properties['surface'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['oneway'] !== null ? Autolinker.link(String(feature.properties['oneway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxspeed'] !== null ? Autolinker.link(String(feature.properties['maxspeed'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxweight'] !== null ? Autolinker.link(String(feature.properties['maxweight'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access'] !== null ? Autolinker.link(String(feature.properties['access'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['lit'] !== null ? Autolinker.link(String(feature.properties['lit'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_BI_20180927_WGS84_transports_roads_lines_roadsother_4_0() {
+            return {
+                pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsother_4',
+                opacity: 1,
+                color: 'rgba(229,182,54,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+            }
+        }
+        map.createPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsother_4');
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsother_4').style.zIndex = 404;
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsother_4').style['mix-blend-mode'] = 'normal';
+        var layer_BI_20180927_WGS84_transports_roads_lines_roadsother_4 = new L.geoJson(json_BI_20180927_WGS84_transports_roads_lines_roadsother_4, {
+            attribution: '',
+            pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsother_4',
+            onEachFeature: pop_BI_20180927_WGS84_transports_roads_lines_roadsother_4,
+            style: style_BI_20180927_WGS84_transports_roads_lines_roadsother_4_0,
+        });
+        bounds_group.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsother_4);
+        map.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsother_4);
+        function pop_BI_20180927_WGS84_transports_roads_lines_roadsmain_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['highway'] !== null ? Autolinker.link(String(feature.properties['highway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ref'] !== null ? Autolinker.link(String(feature.properties['ref'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['surface'] !== null ? Autolinker.link(String(feature.properties['surface'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['oneway'] !== null ? Autolinker.link(String(feature.properties['oneway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxspeed'] !== null ? Autolinker.link(String(feature.properties['maxspeed'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxweight'] !== null ? Autolinker.link(String(feature.properties['maxweight'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access'] !== null ? Autolinker.link(String(feature.properties['access'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['lit'] !== null ? Autolinker.link(String(feature.properties['lit'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_BI_20180927_WGS84_transports_roads_lines_roadsmain_5_0() {
+            return {
+                pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsmain_5',
+                opacity: 1,
+                color: 'rgba(225,89,137,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+            }
+        }
+        map.createPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsmain_5');
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsmain_5').style.zIndex = 405;
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsmain_5').style['mix-blend-mode'] = 'normal';
+        var layer_BI_20180927_WGS84_transports_roads_lines_roadsmain_5 = new L.geoJson(json_BI_20180927_WGS84_transports_roads_lines_roadsmain_5, {
+            attribution: '',
+            pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsmain_5',
+            onEachFeature: pop_BI_20180927_WGS84_transports_roads_lines_roadsmain_5,
+            style: style_BI_20180927_WGS84_transports_roads_lines_roadsmain_5_0,
+        });
+        bounds_group.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsmain_5);
+        map.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsmain_5);
+        function pop_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['highway'] !== null ? Autolinker.link(String(feature.properties['highway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ref'] !== null ? Autolinker.link(String(feature.properties['ref'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['surface'] !== null ? Autolinker.link(String(feature.properties['surface'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['oneway'] !== null ? Autolinker.link(String(feature.properties['oneway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxspeed'] !== null ? Autolinker.link(String(feature.properties['maxspeed'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['maxweight'] !== null ? Autolinker.link(String(feature.properties['maxweight'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access'] !== null ? Autolinker.link(String(feature.properties['access'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['lit'] !== null ? Autolinker.link(String(feature.properties['lit'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6_0() {
+            return {
+                pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6',
+                opacity: 1,
+                color: 'rgba(190,207,80,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+            }
+        }
+        map.createPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6');
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6').style.zIndex = 406;
+        map.getPane('pane_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6').style['mix-blend-mode'] = 'normal';
+        var layer_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6 = new L.geoJson(json_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6, {
+            attribution: '',
+            pane: 'pane_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6',
+            onEachFeature: pop_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6,
+            style: style_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6_0,
+        });
+        bounds_group.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6);
+        map.addLayer(layer_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6);
+        function pop___7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? Autolinker.link(String(feature.properties['osm_id'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['waterway'] !== null ? Autolinker.link(String(feature.properties['waterway'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['width'] !== null ? Autolinker.link(String(feature.properties['width'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['intermitte'] !== null ? Autolinker.link(String(feature.properties['intermitte'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id_2'] !== null ? Autolinker.link(String(feature.properties['osm_id_2'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['waterway_2'] !== null ? Autolinker.link(String(feature.properties['waterway_2'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name_2'] !== null ? Autolinker.link(String(feature.properties['name_2'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['width_2'] !== null ? Autolinker.link(String(feature.properties['width_2'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['intermit_1'] !== null ? Autolinker.link(String(feature.properties['intermit_1'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style___7_0() {
+            return {
+                pane: 'pane___7',
+                opacity: 1,
+                color: 'rgba(31,120,180,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+            }
+        }
+        map.createPane('pane___7');
+        map.getPane('pane___7').style.zIndex = 407;
+        map.getPane('pane___7').style['mix-blend-mode'] = 'normal';
+        var layer___7 = new L.geoJson(json___7, {
+            attribution: '',
+            pane: 'pane___7',
+            onEachFeature: pop___7,
+            style: style___7_0,
+        });
+        bounds_group.addLayer(layer___7);
+        map.addLayer(layer___7);
+        function pop_Chef_Lieu_Commune_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? Autolinker.link(String(feature.properties['ID'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROV_NAME'] !== null ? Autolinker.link(String(feature.properties['PROV_NAME'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['COM_NAME'] !== null ? Autolinker.link(String(feature.properties['COM_NAME'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['population'] !== null ? Autolinker.link(String(feature.properties['population'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Chef_Lieu_Commune_8_0() {
+            return {
+                pane: 'pane_Chef_Lieu_Commune_8',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,158,23,1.0)',
+            }
+        }
+        map.createPane('pane_Chef_Lieu_Commune_8');
+        map.getPane('pane_Chef_Lieu_Commune_8').style.zIndex = 408;
+        map.getPane('pane_Chef_Lieu_Commune_8').style['mix-blend-mode'] = 'normal';
+        var layer_Chef_Lieu_Commune_8 = new L.geoJson(json_Chef_Lieu_Commune_8, {
+            attribution: '',
+            pane: 'pane_Chef_Lieu_Commune_8',
+            onEachFeature: pop_Chef_Lieu_Commune_8,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Chef_Lieu_Commune_8_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Chef_Lieu_Commune_8);
+        map.addLayer(layer_Chef_Lieu_Commune_8);
+        function pop_Chef_Lieu_Province_9(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? Autolinker.link(String(feature.properties['ID'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROV_NAME'] !== null ? Autolinker.link(String(feature.properties['PROV_NAME'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Chef_Lieu_Province_9_0() {
+            return {
+                pane: 'pane_Chef_Lieu_Province_9',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,125,183,1.0)',
+            }
+        }
+        map.createPane('pane_Chef_Lieu_Province_9');
+        map.getPane('pane_Chef_Lieu_Province_9').style.zIndex = 409;
+        map.getPane('pane_Chef_Lieu_Province_9').style['mix-blend-mode'] = 'normal';
+        var layer_Chef_Lieu_Province_9 = new L.geoJson(json_Chef_Lieu_Province_9, {
+            attribution: '',
+            pane: 'pane_Chef_Lieu_Province_9',
+            onEachFeature: pop_Chef_Lieu_Province_9,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Chef_Lieu_Province_9_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Chef_Lieu_Province_9);
+        map.addLayer(layer_Chef_Lieu_Province_9);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/Chef_Lieu_Province_9.png" /> Chef_Lieu_Province': layer_Chef_Lieu_Province_9,'<img src="legend/Chef_Lieu_Commune_8.png" /> Chef_Lieu_Commune': layer_Chef_Lieu_Commune_8,'<img src="legend/__7.png" /> гидрография_линейнные': layer___7,'<img src="legend/BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6.png" /> BI_2018-09-27_WGS84_transports_roads_lines_roads-construction': layer_BI_20180927_WGS84_transports_roads_lines_roadsconstruction_6,'<img src="legend/BI_20180927_WGS84_transports_roads_lines_roadsmain_5.png" /> BI_2018-09-27_WGS84_transports_roads_lines_roads-main': layer_BI_20180927_WGS84_transports_roads_lines_roadsmain_5,'<img src="legend/BI_20180927_WGS84_transports_roads_lines_roadsother_4.png" /> BI_2018-09-27_WGS84_transports_roads_lines_roads-other': layer_BI_20180927_WGS84_transports_roads_lines_roadsother_4,'<img src="legend/BI_20180927_WGS84_buildings_polygons_buildings_3.png" /> BI_2018-09-27_WGS84_buildings_polygons_buildings': layer_BI_20180927_WGS84_buildings_polygons_buildings_3,'<img src="legend/__2.png" /> границы_провинс': layer___2,'<img src="legend/_1.png" /> границы': layer__1,'<img src="legend/hydro_0.png" /> hydro': layer_hydro_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer___7.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['name'] !== null?String('<div style="color: #1f78b4; font-size: 8pt; font-family: \'MS Shell Dlg 2\', sans-serif;">' + layer.feature.properties['name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css___7'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Chef_Lieu_Commune_8.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['COM_NAME'] !== null?String('<div style="color: #000000; font-size: 10pt; font-family: \'MS Shell Dlg 2\', sans-serif;">' + layer.feature.properties['COM_NAME']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Chef_Lieu_Commune_8'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Chef_Lieu_Province_9.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['PROV_NAME'] !== null?String('<div style="color: #000000; font-size: 10pt; font-family: \'MS Shell Dlg 2\', sans-serif;">' + layer.feature.properties['PROV_NAME']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Chef_Lieu_Province_9'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_гидрографиялинейнные_7,layer_ChefLieuCommune_8,layer_ChefLieuProvince_9]);
+        map.on("zoomend", function(){
+            resetLabels([layer_гидрографиялинейнные_7,layer_ChefLieuCommune_8,layer_ChefLieuProvince_9]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_гидрографиялинейнные_7,layer_ChefLieuCommune_8,layer_ChefLieuProvince_9]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_гидрографиялинейнные_7,layer_ChefLieuCommune_8,layer_ChefLieuProvince_9]);
+        });
+        </script>
+    </body>
+</html>
